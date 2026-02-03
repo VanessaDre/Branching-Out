@@ -1,59 +1,89 @@
+"""
+Filter Users Script
+
+This script loads a list of users from a JSON file (users.json) and allows
+filtering by name, age, or email via terminal input.
+
+Behavior:
+- Case-insensitive matching for name and email
+- Exact matching for age (integer)
+- Prints matching user dictionaries
+- Prints a helpful message if no matches are found
+"""
+
 import json
 
 
-def filter_users_by_name(name):
-    """Loads the full users list from the JSON file.
-    Then prints only users whose name matches (case-insensitive)."""
-    with open("users.json", "r") as file:
-        users = json.load(file)
+def load_users(file_path="users.json"):
+    """Load and return the list of users from the given JSON file."""
+    with open(file_path, "r", encoding="utf-8") as file:
+        return json.load(file)
 
-    # Filter list: keep users where the "name" matches the input name.
-    filtered_users = [user for user in users if user["name"].lower() == name.lower()]
 
-    # Print each matching user (as a dictionary).
-    for user in filtered_users:
+def print_users(users):
+    """Print each user dictionary from a list."""
+    for user in users:
         print(user)
 
 
-def filter_users_by_age(age):
-    """Loads users from JSON and prints only those with the exact given age."""
-    with open("users.json", "r") as file:
-        users = json.load(file)
-
-    # Using user.get("age") avoids a KeyError if a user has no "age" field.
-    filtered_users = [user for user in users if user.get("age") == age]
-
-    for user in filtered_users:
-        print(user)
+def filter_users_by_name(users, name):
+    """Return users whose name matches the input name (case-insensitive)."""
+    return [
+        user
+        for user in users
+        if user.get("name", "").lower() == name.lower()
+    ]
 
 
-def filter_users_by_email(email):
-    """Loads users from JSON and prints only users whose email matches
-    (case-insensitive)."""
-    with open("users.json", "r") as file:
-        users = json.load(file)
-
-    filtered_users = [user for user in users if user["email"].lower() == email.lower()]
-
-    for user in filtered_users:
-        print(user)
+def filter_users_by_age(users, age):
+    """Return users whose age matches the given age (exact integer match)."""
+    return [user for user in users if user.get("age") == age]
 
 
-if __name__ == "__main__":
-    """Ask the user what they want to filter by, then route to the correct function."""
+def filter_users_by_email(users, email):
+    """Return users whose email matches the input email (case-insensitive)."""
+    return [
+        user
+        for user in users
+        if user.get("email", "").lower() == email.lower()
+    ]
+
+
+def main():
+    """Run the CLI flow: ask filter option, collect input, print results."""
+    users = load_users()
+
     filter_option = input(
-        "What would you like to filter by? (Currently, name, age, email are supported): "
+        "Filter by: name, age, or email? "
     ).strip().lower()
 
     if filter_option == "name":
-        name_to_search = input("Enter a name to filter users: ").strip()
-        filter_users_by_name(name_to_search)
+        name_to_search = input("Enter a name: ").strip()
+        results = filter_users_by_name(users, name_to_search)
+
     elif filter_option == "age":
-        # Convert input to int because ages in the JSON are numbers.
-        age_to_search = int(input("Enter an age to filter users: ").strip())
-        filter_users_by_age(age_to_search)
+        age_input = input("Enter an age (number): ").strip()
+        try:
+            age_to_search = int(age_input)
+        except ValueError:
+            print("Invalid age input. Please enter a whole number.")
+            return
+        results = filter_users_by_age(users, age_to_search)
+
     elif filter_option == "email":
-        email_to_search = input("Enter an email to filter users: ").strip()
-        filter_users_by_email(email_to_search)
+        email_to_search = input("Enter an email: ").strip()
+        results = filter_users_by_email(users, email_to_search)
+
     else:
         print("Filtering by that option is not yet supported.")
+        return
+
+    if not results:
+        print("No matching users found.")
+        return
+
+    print_users(results)
+
+
+if __name__ == "__main__":
+    main()
