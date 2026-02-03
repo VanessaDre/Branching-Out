@@ -1,16 +1,3 @@
-"""
-Filter Users Script
-
-This script loads a list of users from a JSON file (users.json) and allows
-filtering by name, age, or email via terminal input.
-
-Behavior:
-- Case-insensitive matching for name and email
-- Exact matching for age (integer)
-- Prints matching user dictionaries
-- Prints a helpful message if no matches are found
-"""
-
 import json
 
 
